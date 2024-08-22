@@ -91,6 +91,6 @@ public class Clients extends RepresentationModel<Clients> implements Serializabl
     }
 
     public boolean getAtivo() {
-        return ativo;
+        return this.ativo;
     }
 }

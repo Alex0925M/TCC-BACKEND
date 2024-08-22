@@ -44,18 +44,24 @@ public class SecurityConfigurations {
     );
 
     public static final List<String> AUTHENTICATED = Arrays.asList(
-            "authenticated/**"
+            "/employees",
+            "/employees/**",
+            "/clients",
+            "/clients/**",
+            "/authenticated/clients"
     );
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(WHITELIST.toArray(String[]::new)).permitAll()
-                        .requestMatchers(HttpMethod.POST,  "/auth/register").hasRole("ADMIN")
-                        .requestMatchers(AUTHENTICATED.toArray(String[]::new)).hasAnyRole("ADMIN", "USER", "INTERN")
+                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/clients/**").authenticated()  // Permite acesso autenticado para /clients/** endpoints
+                        .requestMatchers("/employees/**").authenticated()
+                        .requestMatchers("authenticated/**").authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

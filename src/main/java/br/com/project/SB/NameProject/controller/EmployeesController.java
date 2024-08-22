@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("employees")
+@RequestMapping("/employees")
 public class EmployeesController {
 
     @Autowired

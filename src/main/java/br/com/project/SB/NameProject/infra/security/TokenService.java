@@ -25,9 +25,10 @@ public class TokenService {
 
     public String generateToken(User user) {
         try {
-            final var userRoles = user.getRole().getRole();
+            final var userRoles = user.getRole().getRole(); // Verifique se isso está correto e retorna a lista de papéis
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.create().withIssuer("logicflare-sebrae")
+            return JWT.create()
+                    .withIssuer("logicflare-sebrae")
                     .withSubject(user.getUsername())
                     .withExpiresAt(expirationToken())
                     .withClaim("roles", userRoles)
