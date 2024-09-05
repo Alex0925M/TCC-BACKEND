@@ -14,8 +14,6 @@ import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -24,27 +22,30 @@ import java.util.UUID;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 @Data
-public class Company extends RepresentationModel implements Serializable {
+public class Company extends RepresentationModel<Company> implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Pattern(regexp = "\\d{14}", message = "Um CNPJ deve conter 14 digitos.")
     private String cnpj;
+
     private String companyName;
+
     @Enumerated(EnumType.STRING)
     private SegmentsEnum segment;
+
     @Enumerated(EnumType.STRING)
     private QualificationsEnum qualifications;
+
     private Boolean active;
 
-    @Temporal(TemporalType.DATE)
     private LocalDate dateOfCreation;
 
     @ManyToOne
     private Clients clients;
 
-    public void delete(){
+    public void delete() {
         this.active = false;
     }
 
@@ -52,34 +53,40 @@ public class Company extends RepresentationModel implements Serializable {
         this.active = true;
     }
 
-    public Company(CompanyDto data){
+    public Company(CompanyDto data) {
+        if (data == null) {
+            throw new IllegalArgumentException("CompanyDto não pode ser nulo.");
+        }
         this.active = true;
         this.cnpj = data.cnpj();
         this.companyName = data.companyName();
         this.segment = data.segment();
         this.qualifications = data.qualifications();
-        this.clients = new Clients(data.clientsDto());
+        if (data.clientsDto() != null) {
+            this.clients = new Clients(data.clientsDto());
+        }
         this.dateOfCreation = data.dateOfCreation();
     }
 
-    public Company updateCompany(CompanyUpdate data){
-        if (data.cnpj() != null){
+    public Company updateCompany(CompanyUpdate data) {
+        if (data == null) {
+            throw new IllegalArgumentException("CompanyUpdate não pode ser nulo.");
+        }
+        if (data.cnpj() != null) {
             this.cnpj = data.cnpj();
         }
-        if(data.companyName() != null){
+        if (data.companyName() != null) {
             this.companyName = data.companyName();
         }
-        if (data.segment() != null){
+        if (data.segment() != null) {
             this.segment = data.segment();
         }
-        if (data.qualifications() != null){
+        if (data.qualifications() != null) {
             this.qualifications = data.qualifications();
         }
-        if (data.clients() != null){
+        if (data.clients() != null) {
             this.clients = new Clients(data.clients());
         }
-
         return this;
     }
 }
-

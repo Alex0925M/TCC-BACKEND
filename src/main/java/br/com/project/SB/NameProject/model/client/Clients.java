@@ -1,4 +1,5 @@
 package br.com.project.SB.NameProject.model.client;
+
 import br.com.project.SB.NameProject.model.AdressesEmbeddable;
 import br.com.project.SB.NameProject.model.company.Company;
 import jakarta.persistence.*;
@@ -23,19 +24,24 @@ public class Clients extends RepresentationModel<Clients> implements Serializabl
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
     @NotBlank
     @Pattern(regexp = "\\d{11}", message = "Um CPF deve conter 11 digitos.")
     @Column(unique = true)
     private String cpf;
+
     private String cnpj;
     private String name;
     private String phone;
     private String birth;
+
     @OneToMany
     private List<Company> company;
+
     @Column(unique = true)
     @Email(message = "O usuario a ser cadastrado deve conter um e-mail válido.")
     private String email;
+
     private boolean ativo;
 
     @Embedded
@@ -43,7 +49,7 @@ public class Clients extends RepresentationModel<Clients> implements Serializabl
 
     private Boolean status;
 
-    public void delete(){
+    public void delete() {
         this.status = false;
     }
 
@@ -52,6 +58,9 @@ public class Clients extends RepresentationModel<Clients> implements Serializabl
     }
 
     public Clients(ClientsDto data) {
+        if (data == null) {
+            throw new IllegalArgumentException("ClientsDto não pode ser nulo.");
+        }
         this.ativo = true;
         this.cpf = data.cpf();
         this.cnpj = data.cnpj();
@@ -60,31 +69,35 @@ public class Clients extends RepresentationModel<Clients> implements Serializabl
         this.birth = data.birth();
         this.email = data.email();
         this.adresses = new AdressesEmbeddable(data.adress());
+        this.status = data.status();
     }
 
-    public Clients updateClients(ClientsUpdate data){
-        if (data.cpf() != null){
+    public Clients updateClients(ClientsUpdate data) {
+        if (data == null) {
+            throw new IllegalArgumentException("ClientsUpdate não pode ser nulo.");
+        }
+        if (data.cpf() != null) {
             this.cpf = data.cpf();
         }
-        if (data.cnpj() != null){
+        if (data.cnpj() != null) {
             this.cnpj = data.cnpj();
         }
-        if (data.name() != null){
+        if (data.name() != null) {
             this.name = data.name();
         }
-        if (data.phone() != null){
+        if (data.phone() != null) {
             this.phone = data.phone();
         }
-        if (data.birth() != null){
+        if (data.birth() != null) {
             this.birth = data.birth();
         }
-        if (data.email() != null){
+        if (data.email() != null) {
             this.email = data.email();
         }
-        if (data.adress() != null){
+        if (data.adress() != null) {
             this.adresses = new AdressesEmbeddable(data.adress());
         }
-        if(data.status() != null){
+        if (data.status() != null) {
             this.status = data.status();
         }
         return this;

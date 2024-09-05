@@ -40,7 +40,8 @@ public class SecurityConfigurations {
             "/webjars/**",
             "/webjars/swagger-ui/**",
             "/error",
-            "/auth/login"
+            "/auth/login",
+            "/auth/resgister"
     );
 
     public static final List<String> AUTHENTICATED = Arrays.asList(
@@ -48,7 +49,11 @@ public class SecurityConfigurations {
             "/employees/**",
             "/clients",
             "/clients/**",
-            "/authenticated/clients"
+            "/authenticated/clients",
+            "/authenticated/company",
+            "/company/**",
+            "/infos-companies",
+            "/infos/**"
     );
 
     @Bean
@@ -62,6 +67,13 @@ public class SecurityConfigurations {
                         .requestMatchers("/clients/**").authenticated()  // Permite acesso autenticado para /clients/** endpoints
                         .requestMatchers("/employees/**").authenticated()
                         .requestMatchers("authenticated/**").authenticated()
+                        .requestMatchers("authenticated/company").authenticated()
+                        .requestMatchers("/auth/register").permitAll()
+                        .requestMatchers("/company/**").authenticated()
+                        .requestMatchers("/infos-companies").authenticated()
+                        .requestMatchers("/infos-**/").authenticated()
+                        .requestMatchers("/authenticated/clients").authenticated()
+                        .requestMatchers("/authenticated/company").authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

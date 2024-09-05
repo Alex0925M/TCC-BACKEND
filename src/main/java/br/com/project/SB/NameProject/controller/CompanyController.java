@@ -5,20 +5,19 @@ import br.com.project.SB.NameProject.enums.SegmentsEnum;
 import br.com.project.SB.NameProject.model.company.Company;
 import br.com.project.SB.NameProject.model.company.CompanyDto;
 import br.com.project.SB.NameProject.model.company.CompanyUpdate;
-import br.com.project.SB.NameProject.repository.CompanyRepository;
 import br.com.project.SB.NameProject.service.CompanyService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -30,58 +29,77 @@ public class CompanyController {
 
     @GetMapping
     public ResponseEntity<List<Company>> getAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getAll());
+        List<Company> companies = service.getAll();
+        return ResponseEntity.ok(companies);
     }
 
-    @GetMapping("/active")
-    public ResponseEntity<List<Company>> getAllActiveByTrue() {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getAllByActive());
-    }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Company>> getById(@PathVariable UUID id) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getById(id));
+    public ResponseEntity<Company> getById(@PathVariable UUID id) {
+        try {
+            Company company = service.getById(id); // Método service.getById já lança exceção se não encontrar
+            return ResponseEntity.ok(company);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Company> create(@RequestBody @Valid CompanyDto company) {
-        var created = service.create(company);
-        final URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
-
-        return ResponseEntity.status(HttpStatus.CREATED).location(location).body(created);
+    public ResponseEntity<Company> create(@RequestBody @Valid CompanyDto companyDto) {
+        Company createdCompany = service.create(companyDto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdCompany.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(createdCompany);
     }
 
     @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity<Company> update(@PathVariable @Value("id") UUID id, @RequestBody @Valid CompanyUpdate companyUpdate) {
-        final URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
-        return ResponseEntity.status(HttpStatus.OK).location(location).body(service.update(id, companyUpdate));
+    public ResponseEntity<Company> update(@PathVariable UUID id, @RequestBody @Valid CompanyUpdate companyUpdate) {
+        try {
+            Company updatedCompany = service.update(id, companyUpdate);
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(id)
+                    .toUri();
+            return ResponseEntity.ok().location(location).body(updatedCompany);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<Optional<Company>> delete(@PathVariable UUID id) {
-        service.delete(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        try {
+            service.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/restore/{id}")
     @Transactional
-    public ResponseEntity<Optional<Company>> restore(@PathVariable UUID id) {
-        service.restore(id);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<Void> restore(@PathVariable UUID id) {
+        try {
+            service.restore(id);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
-
     @GetMapping("/segments")
-    public ResponseEntity<List<SegmentsEnum>> segments() {
-        final List<SegmentsEnum> segmentsList = service.getSegments();
-        return ResponseEntity.status(HttpStatus.OK).body(segmentsList);
+    public ResponseEntity<List<SegmentsEnum>> getSegments() {
+        List<SegmentsEnum> segments = Arrays.asList(SegmentsEnum.values());
+        return ResponseEntity.ok(segments);
     }
 
     @GetMapping("/qualifications")
-    public ResponseEntity<List<QualificationsEnum>> qualifications() {
-        final List<QualificationsEnum> qualificationsList = service.getQualifications();
-        return ResponseEntity.status(HttpStatus.OK).body(qualificationsList);
+    public ResponseEntity<List<QualificationsEnum>> getQualifications() {
+        List<QualificationsEnum> qualifications = Arrays.asList(QualificationsEnum.values());
+        return ResponseEntity.ok(qualifications);
     }
 }

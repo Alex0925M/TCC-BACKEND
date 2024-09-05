@@ -26,33 +26,32 @@ public class CompanyService {
         return repository.findAll();
     }
 
-    public List<Company> getAllByActive() {
-        List<Company> companyList = repository.findAll();
-
-        return companyList.stream().filter(Company::getActive).collect(Collectors.toList());
-    }
-
-    public Optional<Company> getById(UUID id) {
-        if (!repository.existsById(id)) {
-            throw new EntityNotFoundException("ID inexistente");
-        }
-        return repository.findById(id);
+    public Company getById(UUID id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Empresa com ID " + id + " não encontrada."));
     }
 
     public Company update(UUID id, CompanyUpdate companyUpdate) {
-        return repository.getReferenceById(id).updateCompany(companyUpdate);
+        Company company = getById(id); // Verifica se a empresa existe
+        company.updateCompany(companyUpdate);
+        return repository.save(company); // Salva as alterações
     }
 
-    public Company create(CompanyDto company) {
-        return repository.save(new Company(company));
+    public Company create(CompanyDto companyDto) {
+        Company company = new Company(companyDto);
+        return repository.save(company);
     }
 
-    public void delete(UUID id){
-        repository.getReferenceById(id).delete();
+    public void delete(UUID id) {
+        Company company = getById(id); // Verifica se a empresa existe
+        company.delete();
+        repository.save(company); // Atualiza o status no banco de dados
     }
 
     public void restore(UUID id) {
-        repository.getReferenceById(id).restore();
+        Company company = getById(id); // Verifica se a empresa existe
+        company.restore();
+        repository.save(company); // Atualiza o status no banco de dados
     }
 
     public List<SegmentsEnum> getSegments() {
