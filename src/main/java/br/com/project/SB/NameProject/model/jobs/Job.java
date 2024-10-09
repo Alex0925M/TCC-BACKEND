@@ -78,7 +78,7 @@ public class Job extends RepresentationModel<Job> implements Serializable {
 
     public Job(JobDto data) {
         this.serviceType = data.serviceType();
-        this.employe = new Employe(data.employe()); // Convert EmployeDto to Employe if needed
+        this.employe = new Employe(data.employe());
         this.active = true;
     }
 }

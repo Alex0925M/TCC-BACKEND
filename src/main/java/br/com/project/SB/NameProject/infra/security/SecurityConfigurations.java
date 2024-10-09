@@ -53,7 +53,9 @@ public class SecurityConfigurations {
             "/authenticated/company",
             "/company/**",
             "/infos-companies",
-            "/infos/**"
+            "/infos/**",
+            "interns",
+            "authenticated/interns"
     );
 
     @Bean
@@ -74,6 +76,7 @@ public class SecurityConfigurations {
                         .requestMatchers("/infos-**/").authenticated()
                         .requestMatchers("/authenticated/clients").authenticated()
                         .requestMatchers("/authenticated/company").authenticated()
+                        .requestMatchers("interns").authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
